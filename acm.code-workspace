@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "/Users/kimjunhee/Desktop/Algorithm/algo"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"utility": "cpp"
+		}
+	}
+}
