@@ -1,58 +1,71 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-bool inorder(vector<int> &v){
-  for(int i = 0 ; i < v.size() -1; i++){
-    if(v[i] < v[i+1]) return false;
-  }
-  return true;
+int n,k,d[10],use=0,ans;
+vector<int> place;
+string x;
+
+string swap_s(string a, int i, int j){
+  char tmp;
+  tmp = a[i];
+  a[i] = a[j];
+  a[j] = tmp;
+  return a;
 }
+
+
+void proc(string x, int len, int start, int remain){
+  if(remain == 0 || start == len){
+    if(!(remain&1) || !remain){
+      ans = max(ans,stoi(x));
+    }else{
+      bool two = false;
+      for(int i = 0; i < 10; i++){
+        if(d[i] >= 2) two = true;
+      }
+      if(two){
+        ans = max(ans,stoi(x));
+      }else{
+        char t = x[len-1];
+        x[len-1] = x[len-2];
+        x[len-2] = t;
+        ans = max(ans,stoi(x));
+      }
+    }
+    return;
+  }
+  bool done = false;
+  for(int next = start+1; next < len; next++){
+    if((int)(x[next]-'0') == place[start] && (int)(x[start]-'0') != place[start]){
+      done = true;
+      proc(swap_s(x,start,next), len, start+1, remain-1);
+    }
+  }
+  if(!done) proc(x,len,start+1,remain);
+  return;
+}
+
+
 
 int main(){
 
-  string x;
-  int n;
-  cin>>x;
-  cin>>n;
-  vector<int> v(x.length(),0);
+  memset(d,0,sizeof(d));
+  cin>>n>>k;
+  ans = 0;
+  x = to_string(n);
   int len = x.length();
-  if(len == 1){
-    cout<<-1<<'\n';
-    return 0;
+  for(int i = 0; i < len; i++){
+    d[(int)(x[i]-'0')]++;
+    place.push_back((int)(x[i]-'0'));
   }
-  for(int i = 0 ; i < len ;i++){
-    v[i] = (int)(x[i]-'0');
+  sort(place.begin(),place.end());
+  reverse(place.begin(),place.end());
+  if(len == 1) cout<<-1<<'\n';
+  else if(len == 2 && d[0] == 1) cout<<-1<<'\n';
+  else{
+    proc(x,len,0,k);
+    cout<<ans<<'\n';
   }
-
-  int c = 0, turn = 0;
-  while(c < n && turn < len){
-    int max_ = -1, index = -1;
-    for(int sw = turn; sw < len; sw++){
-      if(v[sw] > max_){
-        max_ = v[sw];
-        index = sw;
-      }
-    }
-    if(index == turn){
-      turn++;
-      continue;
-    }
-    else{
-      c++;
-      swap(v[turn], v[index]);
-    }
-    turn++;
-    if(inorder(v)) break;
-  }
-  if((n - c)&1){
-    int k = 0;
-    for(int i = 0 ; i < len-1; i++){
-      if(v[i] == v[i+1]) k++;
-    }
-    if(len >= 2 && k==0) swap(v[len-1],v[len-2]);
-  }
-  for(auto p: v) cout<<p;
-  cout<<'\n';
 
   return 0;
 }

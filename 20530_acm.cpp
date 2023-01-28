@@ -1,111 +1,76 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-vector<int> adj[200001];
-int parent[200001];
+int n,q,a,b,u,v,root_cycle;
+
+vector<int> node[200001],cycle;
 bool check[200001];
-bool exists[200001];
-int n,q,x,y;
-int s,f;
-set<int> se;
-int query(int i, int j){
+int p[200001],indegree[200001],isNotcycle[200001];
+map<int,int> group;
 
-  if(parent[i] == parent[j]) return 1;
-  else return 2;
+void make_cycle(int here){
 
+  queue<int> q;
+  for(int i=1;i<=n;i++) if(indegree[i]==1){
+    isNotcycle[i]=1;
+    q.push(i);
+  }
+  while(!q.empty()){
+    int f = q.front();
+    check[f]=true;
+    q.pop();
+    for(auto &next:node[f]){
+      indegree[next]--;
+      if(!check[next]&&indegree[next]==1){
+        isNotcycle[next]=1;
+        q.push(next);
+      }
+    }
+  }
+  for(int i=1;i<=n;i++){
+    if(!isNotcycle[i]) cycle.push_back(i);
+  }
 }
 
-void init(int here){
-  check[here] = true;
-  for(auto&p : adj[here]){
-    cout<<p;
-    if(!check[p]) init(p);
-    else{
-      s = here, f = p;
-      return;
+
+
+void make_tree_from_cycle(int here, int root_cycle){
+  check[here]=true;
+  for(auto &p:node[here]){
+    if(!check[p]&&!group[p]){
+      group[p]=root_cycle;
+      make_tree_from_cycle(p,root_cycle);
     }
   }
   return;
 }
 
-bool dfs(int here){
 
-  bool done = false;
-  check[here] = true;
-  if(here == f){
-    se.insert(f);
-    exists[here] = true;
-    return true;
-  }
-  for(auto &p:adj[here]){
-    if(!check[p]){
-      //cout<<p<<"\n";
-      if(dfs(p)){
-        //cout<<here<<'\n';
-        se.insert(here);
-        exists[here] = true;
-        done = true;
-      }
-    }else if(p == f){
-      se.insert(here);
-      exists[here] = true;
-      done = true;
-    }
-  }
-  return done;
-}
-
-void dfs2(int root, int here){
-  check[here] = true;
-  for(auto& p : adj[here]){
-    if(!check[p]){
-      if(!exists[p]){
-        //cout<<"go"<<p<<'\n';
-        parent[p] = root;
-        dfs2(root, p);
-      }
-    }
-  }
-  return;
-}
 
 int main(){
-
   ios_base::sync_with_stdio(0);
   cin.tie(0);
 
-  memset(parent,-1,sizeof(parent));
-  memset(check, false, sizeof(check));
-  memset(exists,false,sizeof(exists));
   cin>>n>>q;
-  for(int i = 0 ; i < n; i++){
-    cin>>x>>y;
-    adj[x].push_back(y);
-    adj[y].push_back(x);
+  for(int i=1;i<=n;i++) p[i]=i;
+  for(int i=1;i<=n;i++){
+    cin>>u>>v;
+    node[u].push_back(v);
+    node[v].push_back(u);
+    indegree[u]++;
+    indegree[v]++;
   }
-  init(1);
-  memset(check, false, sizeof(check));
-  cout<<"s,f: "<<s<<" "<<f<<'\n';
-  dfs(s);
+  make_cycle(1);
   memset(check,false,sizeof(check));
-
-  for(auto it = se.begin(); it!=se.end();it++){
-    cout<<*it<<" ";
+  for(auto c:cycle) group[c]=c;
+  for(auto c:cycle){
+    make_tree_from_cycle(c,c);
   }
-  cout<<'\n';
-
-  for(auto it = se.begin(); it!=se.end();it++){
-    parent[*it] = *it;
-    dfs2(*it,*it);
+  for(int i=1;i<=q;i++){
+    cin>>a>>b;
+    if(group[a]==group[b]) cout<<1<<'\n';
+    else cout<<2<<'\n';
   }
-
-  for(int i = 1; i <= n; i++) cout<<parent[i]<<' ';
-
-  for(int i = 0 ; i < q; i++){
-    cin>>x>>y;
-    cout<<query(x,y)<<'\n';
-  }
-
 
   return 0;
 }

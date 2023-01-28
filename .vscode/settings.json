@@ -9,6 +9,8 @@
         "ios": "cpp",
         "memory": "cpp",
         "regex": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "iosfwd": "cpp",
+        "string": "cpp"
     }
 }

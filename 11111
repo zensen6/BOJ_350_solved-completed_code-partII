@@ -1,0 +1,6 @@
+SELECT buyer_id, SUM(library.price) FROM (SELECT DISTINCT orderInfo.book_id, orderInfo.buyer_id, customer.membership FROM customer INNER JOIN orderInfo ON customer.user_id = orderInfo.buyer_id) AS A
+INNER JOIN
+library
+ON A.book_id = library.book_id
+GROUP BY buyer_id
+HAVING membership = '1';

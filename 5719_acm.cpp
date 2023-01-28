@@ -1,129 +1,78 @@
-#include <bits/stdc++.h>
-#define INF 1000000000
+#include<bits/stdc++.h>
+#define MAX 1000000000
 using namespace std;
 
-int n, m, s, d, x, y, p;
-vector<pair<int, int>> adj[501];
-vector<pair<int, int>> rev[501];
+
+int n,m,s,d,u,v,c;
 int dist[501];
-bool check[501];
+vector<pair<int,int>> node[501], rev[501];
+bool check[501][501];
 
-void proc(bool reve)
-{
 
-    if (reve)
-    {
-        for (int i = 0; i < 501; i++)
-        {
-            if (rev[i].size())
-            {
-                adj[i].assign(rev[i].begin(), rev[i].end());
-            }
-        }
-    }
-    priority_queue<pair<int, int>> pq;
+int dijkstra(){
 
-    for (int i = 0; i < 501; i++)
-        dist[i] = INF;
-    if (reve)
-    {
-        dist[d] = 0;
-        pq.push({0, d});
+  for(int i=0;i<501;i++) dist[i] = MAX;
+  dist[s] = 0;
+  priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+  pq.push({0,s});
+  while(!pq.empty()){
+    auto f = pq.top();
+    pq.pop();
+    int cost = f.first, target = f.second;
+    if(dist[target] < cost) continue;
+    for(auto &p:node[target]){
+      int cost_ = p.second, next = p.first;
+      if(dist[target] + cost_ < dist[next] && !check[target][next]){
+        dist[next] = dist[target] + cost_;
+        pq.push({dist[next], next});
+      }
     }
-    else
-    {
-        dist[s] = 0;
-        pq.push({0, s});
-    }
-    while (!pq.empty())
-    {
-        auto t = pq.top();
-        int here = t.second;
-        int cost = -t.first;
-        pq.pop();
-        if (cost > dist[here])
-            continue;
-        for (auto p : adj[here])
-        {
-            if (p.first == -1)
-                continue;
-            int weight = p.second;
-            int to = p.first;
-            if (cost + weight < dist[to])
-            {
-                dist[to] = cost + weight;
-                pq.push({-dist[to], to});
-            }
-        }
-    }
-    return;
+  }
+  return dist[d];
 }
 
-void dfs(int here)
-{
-    if (here == s)
-    {
-        return;
+void dfs(int here){
+  if(here == s) return;
+  for(auto &p: rev[here]){
+    int cost = p.second, prev = p.first;
+    if(!check[prev][here] && dist[here] - cost == dist[prev]){
+      check[prev][here] = true;
+      dfs(prev);
     }
-    check[here] = true;
-    for (auto &p : rev[here])
-    {
-        if (dist[here] - p.second == dist[p.first])
-        {
-            if (!check[p.first])
-            {
-                dfs(p.first);
-                p.first = -1;
-                p.second = -1;
-            }
-        }
-    }
-    return;
+  }
+  return;
 }
 
-int main()
-{
 
-    while (scanf("%d %d", &n, &m) == 2 && (n || m))
-    {
-        memset(check, false, sizeof(check));
-        for (int i = 0; i < 501; i++)
-        {
-            adj[i].clear();
-            rev[i].clear();
-        }
 
-        scanf("%d %d", &s, &d);
-        for (int i = 0; i < m; i++)
-        {
-            scanf("%d %d %d", &x, &y, &p);
-            adj[x].push_back({y, p});
-            rev[y].push_back({x, p});
-        }
-        proc(false);
-        dfs(d);
+int main(){
 
-        /*
-        for (int i = 0; i < n; i++)
-        {
-            for (auto p : rev[i])
-            {
-                printf("from:%d  to:%d  cost:%d", i, p.first, p.second);
-            }
-            printf("\n");
-        }
-        */
+  while(cin>>n>>m){
+    if(n == 0 && m == 0) break;
+    for(int i=0;i<501;i++){
+      node[i].clear();
+      rev[i].clear();
+    }
+    memset(check,false,sizeof(check));
+    cin>>s>>d;
+    for(int i=0;i<m;i++){
+      cin>>u>>v>>c;
+      node[u].push_back({v,c});
+      rev[v].push_back({u,c});
+    }
+    dijkstra();
+    dfs(d);
 
-        proc(true);
-        if (dist[s] == INF)
-        {
-            printf("%d\n", -1);
-        }
-        else
-        {
-            printf("%d\n", dist[s]);
-        }
+    int ret = dijkstra();
+    if(ret == MAX){
+      cout<<-1<<'\n';
+    }else{
+      cout<<ret<<'\n';
     }
 
-    return 0;
+  }
+
+
+
+  return 0;
 }
